@@ -1,13 +1,15 @@
-name: Nodeseek-Signin
+name: NodeSeek-Signin
 
 on:
   push:
   pull_request:
+  watch:
+    types: [ started ]
   schedule:
     - cron: 0 */3 * * *
 
 jobs:
-  Nodeseek-Signin:
+  NodeSeek-Signin:
     runs-on: ubuntu-latest
     env:
       USE_SMTP: ${{ secrets.USE_SMTP }}
@@ -17,20 +19,23 @@ jobs:
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
       SMTP_RECEIVER: ${{ secrets.SMTP_RECEIVER }}
       RANDOM: ${{ secrets.RANDOM }}
+      COOKIES: ${{ secrets.COOKIES }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       
       - name: Set script permissions
         run: chmod +x signin.sh
       
       - name: signin
-        env:
-          COOKIE: ${{ secrets.COOKIE }}
         run: |
-          OUTPUT=$(./signin.sh "$COOKIE")
-          echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
-    
+          IFS=$'\n'
+          for COOKIE in ${COOKIES}
+          do
+            OUTPUT=$(./signin.sh "$COOKIE" "$RANDOM")
+            echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
+          done
+
       - name: Send mail
         if: env.USE_SMTP == 'true'
         uses: dawidd6/action-send-mail@v3
