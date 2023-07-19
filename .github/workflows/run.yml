@@ -1,0 +1,45 @@
+name: Nodeseek-Signin
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: 0 */3 * * *
+
+jobs:
+  Nodeseek-Signin:
+    runs-on: ubuntu-latest
+    env:
+      USE_SMTP: ${{ secrets.USE_SMTP }}
+      SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      SMTP_RECEIVER: ${{ secrets.SMTP_RECEIVER }}
+      RANDOM: ${{ secrets.RANDOM }}
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set script permissions
+        run: chmod +x signin.sh
+      
+      - name: signin
+        env:
+          COOKIE: ${{ secrets.COOKIE }}
+        run: |
+          OUTPUT=$(./signin.sh "$COOKIE")
+          echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
+    
+      - name: Send mail
+        if: env.USE_SMTP == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ env.SMTP_SERVER }}
+          server_port: ${{ env.SMTP_PORT }}
+          username: ${{ env.SMTP_USERNAME }}
+          password: ${{ env.SMTP_PASSWORD }}
+          subject: NodeSeek 每日签到
+          to: ${{ env.SMTP_RECEIVER }}
+          from: ${{ env.SMTP_USERNAME }}
+          body: ${{ env.OUTPUT }}
