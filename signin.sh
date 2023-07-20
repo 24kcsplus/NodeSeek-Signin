@@ -9,7 +9,7 @@ for COOKIE in ${COOKIES[@]}; do
       -H "Cookie: $COOKIE" \
       ...)
 
-    echo $response  # Add this line
+    echo "Response: $response"  # Print the response
 
     success=$(echo $response | jq -r .success)
     message=$(echo $response | jq -r .message)
@@ -25,7 +25,7 @@ for COOKIE in ${COOKIES[@]}; do
       -H "Cookie: $COOKIE" \
       ...)
 
-    echo $response  # Add this line
+    echo "Response: $response"  # Print the response
 
     success=$(echo $response | jq -r '.success')
     if [ "$success" = true ] ; then
