@@ -9,6 +9,8 @@ for COOKIE in ${COOKIES[@]}; do
       -H "Cookie: $COOKIE" \
       ...)
 
+    echo $response  # Add this line
+
     success=$(echo $response | jq -r .success)
     message=$(echo $response | jq -r .message)
     current=$(echo $response | jq -r .current)
@@ -22,6 +24,8 @@ for COOKIE in ${COOKIES[@]}; do
     response=$(curl 'https://www.nodeseek.com/api/attendance?random=false' --compressed -X POST \
       -H "Cookie: $COOKIE" \
       ...)
+
+    echo $response  # Add this line
 
     success=$(echo $response | jq -r '.success')
     if [ "$success" = true ] ; then
