@@ -1,15 +1,15 @@
-name: NodeSeek-Signin
+name: GLaDOS-Signin
 
 on:
   push:
   pull_request:
   watch:
-    types: [ started ]
+    types: [started]
   schedule:
     - cron: 0 */3 * * *
 
 jobs:
-  NodeSeek-Signin:
+  GLaDOS-Signin:
     runs-on: ubuntu-latest
     env:
       USE_SMTP: ${{ secrets.USE_SMTP }}
@@ -18,24 +18,28 @@ jobs:
       SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
       SMTP_RECEIVER: ${{ secrets.SMTP_RECEIVER }}
-      RANDOM: ${{ secrets.RANDOM }}
-      COOKIES: ${{ secrets.COOKIES }}
 
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v3
+
+      - name: Set up jq
+        uses: docker://stedolan/jq
+
       - name: Set script permissions
         run: chmod +x signin.sh
-      
+
       - name: signin
+        env:
+          COOKIE: ${{ secrets.COOKIE }}
+          RANDOM: ${{ secrets.RANDOM }}
         run: |
           IFS=$'\n'
-          for COOKIE in ${COOKIES}
-          do
-            OUTPUT=$(./signin.sh "$COOKIE" "$RANDOM")
-            echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
-          done
-
+          cookies=($COOKIE)
+          for cookie in "${cookies[@]}"; do
+            OUTPUT=$(./signin.sh "$cookie" "$RANDOM")
+            echo "OUTPUT=$OUTPUT"
+          done >> $GITHUB_ENV
+      
       - name: Send mail
         if: env.USE_SMTP == 'true'
         uses: dawidd6/action-send-mail@v3
@@ -44,7 +48,7 @@ jobs:
           server_port: ${{ env.SMTP_PORT }}
           username: ${{ env.SMTP_USERNAME }}
           password: ${{ env.SMTP_PASSWORD }}
-          subject: NodeSeek 每日签到
+          subject: GLaDOS 每日签到
           to: ${{ env.SMTP_RECEIVER }}
           from: ${{ env.SMTP_USERNAME }}
           body: ${{ env.OUTPUT }}
