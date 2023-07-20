@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   watch:
-    types: [started]
+    types: [ started ]
   schedule:
     - cron: 0 */3 * * *
 
@@ -18,28 +18,20 @@ jobs:
       SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
       SMTP_RECEIVER: ${{ secrets.SMTP_RECEIVER }}
+      COOKIE: ${{ secrets.COOKIE }}
+      Random: ${{ secrets.Random }}
 
     steps:
       - uses: actions/checkout@v3
-
-      - name: Set up jq
-        uses: docker://stedolan/jq
-
+      
       - name: Set script permissions
         run: chmod +x signin.sh
-
-      - name: signin
-        env:
-          COOKIE: ${{ secrets.COOKIE }}
-          RANDOM: ${{ secrets.RANDOM }}
-        run: |
-          IFS=$'\n'
-          cookies=($COOKIE)
-          for cookie in "${cookies[@]}"; do
-            OUTPUT=$(./signin.sh "$cookie" "$RANDOM")
-            echo "OUTPUT=$OUTPUT"
-          done >> $GITHUB_ENV
       
+      - name: signin
+        run: |
+          OUTPUT=$(./signin.sh)
+          echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
+    
       - name: Send mail
         if: env.USE_SMTP == 'true'
         uses: dawidd6/action-send-mail@v3
