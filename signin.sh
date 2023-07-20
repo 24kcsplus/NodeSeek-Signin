@@ -11,14 +11,13 @@ for COOKIE in ${COOKIES[@]}; do
 
     echo "Response: $response"  # Print the response
 
-    success=$(echo $response | jq -r .success)
-    message=$(echo $response | jq -r .message)
-    current=$(echo $response | jq -r .current)
-
+    success=$(echo $response | jq -r .success 2>/dev/null)
     if [ "$success" = "true" ]; then
+      message=$(echo $response | jq -r .message 2>/dev/null)
+      current=$(echo $response | jq -r .current 2>/dev/null)
       echo "签到成功，$message，如今有$current个鸡腿"
     else
-      echo "签到失败，错误信息：$message"
+      echo "签到失败，错误信息：$response"
     fi
   else
     response=$(curl 'https://www.nodeseek.com/api/attendance?random=false' --compressed -X POST \
@@ -27,14 +26,14 @@ for COOKIE in ${COOKIES[@]}; do
 
     echo "Response: $response"  # Print the response
 
-    success=$(echo $response | jq -r '.success')
+    success=$(echo $response | jq -r '.success' 2>/dev/null)
     if [ "$success" = true ] ; then
-      message=$(echo $response | jq -r '.message')
-      gain=$(echo $response | jq -r '.gain')
-      current=$(echo $response | jq -r '.current')
+      message=$(echo $response | jq -r '.message' 2>/dev/null)
+      gain=$(echo $response | jq -r '.gain' 2>/dev/null)
+      current=$(echo $response | jq -r '.current' 2>/dev/null)
       echo "签到成功，$message，如今有$current 个鸡腿"
     else
-      echo "签到失败，错误信息：$message"
+      echo "签到失败，错误信息：$response"
     fi
   fi
 done
