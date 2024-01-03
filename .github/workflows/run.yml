@@ -31,6 +31,7 @@ jobs:
         run: |
           OUTPUT=$(./signin.sh)
           echo "OUTPUT=$OUTPUT" >> $GITHUB_ENV
+          env
     
       - name: Send mail
         if: env.USE_SMTP == 'true'
